@@ -1,0 +1,57 @@
+{
+  "name": "lobster-launcher",
+  "version": "1.0.0",
+  "description": "Lobster Launcher - OpenClaw Desktop Management Tool",
+  "main": "./out/main/index.js",
+  "author": "OpenClaw User",
+  "license": "MIT",
+  "scripts": {
+    "dev": "electron-vite dev",
+    "build": "electron-vite build",
+    "preview": "electron-vite preview",
+    "postinstall": "electron-builder install-app-deps",
+    "build:unpack": "npm run build && electron-builder --dir",
+    "build:win": "npm run build && electron-builder --win",
+    "build:mac": "npm run build && electron-builder --mac"
+  },
+  "dependencies": {
+    "@electron-toolkit/preload": "^3.0.1",
+    "@electron-toolkit/utils": "^3.0.0",
+    "electron-log": "^5.2.4"
+  },
+  "devDependencies": {
+    "@electron-toolkit/tsconfig": "^1.0.1",
+    "@vitejs/plugin-vue": "^5.2.1",
+    "electron": "^33.0.0",
+    "electron-builder": "^25.1.8",
+    "electron-vite": "^2.3.0",
+    "typescript": "^5.7.3",
+    "vite": "^5.4.0",
+    "vue": "^3.5.13",
+    "vue-tsc": "^2.2.2"
+  },
+  "build": {
+    "appId": "com.openclaw.lobster-launcher",
+    "productName": "LobsterLauncher",
+    "directories": {
+      "output": "dist"
+    },
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": ["x64"]
+        }
+      ]
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true
+    },
+    "files": [
+      "out/**/*"
+    ]
+  }
+}

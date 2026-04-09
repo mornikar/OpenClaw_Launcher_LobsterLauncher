@@ -1,0 +1,43 @@
+name: Bug Report
+description: Create a bug report to help us improve
+title: "[Bug] "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## Bug Report | Bug 反馈
+        
+        Thanks for taking the time to fill out this bug report!
+        
+        感谢您抽出时间填写此 Bug 报告！
+  - type: textarea
+    id: description
+    attributes:
+      label: Description | 描述
+      placeholder: Describe the bug in detail | 详细描述 Bug
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Steps to Reproduce | 复现步骤
+      placeholder: |
+        1. Go to '...'
+        2. Click on '....'
+        3. See error
+        
+        1. 进入...
+        2. 点击...
+        3. 看到错误
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected Behavior | 预期行为
+  - type: textarea
+    id: screenshots
+    attributes:
+      label: Screenshots | 截图
+      placeholder: If applicable, add screenshots here | 如果适用，请在此添加截图
