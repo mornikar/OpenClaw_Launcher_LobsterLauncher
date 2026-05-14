@@ -510,9 +510,24 @@ function registerGlobalShortcuts(): void {
 
 // IPC 处理器
 function setupIpcHandlers(): void {
+  // 通用包装器：捕获 IPC 序列化错误
+  function wrapHandler<T = any>(handler: (...args: any[]) => T): (...args: any[]) => Promise<T> | T {
+    return async (...args: any[]) => {
+      try {
+        return await handler(...args)
+      } catch (e) {
+        log.error('IPC handler error:', e)
+        // 返回纯对象，避免返回 Error 等无法序列化的类型
+        return { error: String(e) } as any
+      }
+    }
+  }
+
   // 获取配置
   ipcMain.handle('get-config', () => {
-    return loadConfig()
+    const config = loadConfig()
+    log.info('get-config returning:', JSON.stringify(config))
+    return config
   })
 
   // 保存配置
@@ -523,7 +538,9 @@ function setupIpcHandlers(): void {
 
   // 获取服务配置
   ipcMain.handle('get-services', () => {
-    return loadServicesConfig()
+    const services = loadServicesConfig()
+    log.info('get-services returning:', JSON.stringify(services))
+    return services
   })
 
   // 保存服务配置
@@ -534,9 +551,10 @@ function setupIpcHandlers(): void {
 
   // 检测 OpenClaw
   ipcMain.handle('detect-openclaw', () => {
-    const path = detectOpenClawPath()
-    const token = readToken(path)
-    return { path, token }
+    const p = detectOpenClawPath()
+    const token = readToken(p)
+    log.info('detect-openclaw returning:', { path: p, token: token ? '***' : '' })
+    return { path: p, token }
   })
 
   // 安装 OpenClaw
@@ -817,7 +835,7 @@ function setupIpcHandlers(): void {
     const openclawPath = detectOpenClawPath()
     const homeDir = os.homedir()
     
-    return {
+    const result = {
       main: openclawPath,
       config: join(homeDir, '.openclaw'),
       skills: join(homeDir, '.workbuddy', 'skills'),
@@ -825,6 +843,8 @@ function setupIpcHandlers(): void {
       workspace: join(homeDir, 'WorkBuddy'),
       dotOpenclaw: join(homeDir, '.openclaw')
     }
+    log.info('get-openclaw-paths returning:', JSON.stringify(result))
+    return result
   })
 
   // 选择文件夹

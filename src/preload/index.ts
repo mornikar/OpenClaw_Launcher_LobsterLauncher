@@ -4,11 +4,25 @@ import { electronAPI } from '@electron-toolkit/preload'
 // 自定义 API
 const api = {
   // 配置相关
-  getConfig: () => ipcRenderer.invoke('get-config'),
+  getConfig: async () => {
+    try {
+      return await ipcRenderer.invoke('get-config')
+    } catch (e) {
+      console.error('IPC error in getConfig:', e)
+      throw e
+    }
+  },
   saveConfig: (config: any) => ipcRenderer.invoke('save-config', config),
 
   // 服务相关
-  getServices: () => ipcRenderer.invoke('get-services'),
+  getServices: async () => {
+    try {
+      return await ipcRenderer.invoke('get-services')
+    } catch (e) {
+      console.error('IPC error in getServices:', e)
+      throw e
+    }
+  },
   saveServices: (services: any[]) => ipcRenderer.invoke('save-services', services),
   startService: (service: any) => ipcRenderer.invoke('start-service', service),
   stopService: (serviceName: string) => ipcRenderer.invoke('stop-service', serviceName),
@@ -20,9 +34,23 @@ const api = {
   stopGateway: () => ipcRenderer.invoke('stop-gateway'),
 
   // OpenClaw 相关
-  detectOpenClaw: () => ipcRenderer.invoke('detect-openclaw'),
+  detectOpenClaw: async () => {
+    try {
+      return await ipcRenderer.invoke('detect-openclaw')
+    } catch (e) {
+      console.error('IPC error in detectOpenClaw:', e)
+      throw e
+    }
+  },
   fetchToken: () => ipcRenderer.invoke('fetch-token'),
-  getOpenClawPaths: () => ipcRenderer.invoke('get-openclaw-paths'),
+  getOpenClawPaths: async () => {
+    try {
+      return await ipcRenderer.invoke('get-openclaw-paths')
+    } catch (e) {
+      console.error('IPC error in getOpenClawPaths:', e)
+      throw e
+    }
+  },
   openTerminal: () => ipcRenderer.invoke('open-terminal'),
   installOpenClaw: () => ipcRenderer.invoke('install-openclaw'),
   onOpenClawInstallProgress: (callback: (data: any) => void) => {

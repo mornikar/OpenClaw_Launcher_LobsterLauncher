@@ -132,12 +132,32 @@ onMounted(async () => {
   console.log('HomePage 组件已挂载')
   console.log('window.api:', window.api)
   
-  await loadConfig()
-  await loadOpenClawPaths()
-  await loadCustomFolders()
-  await loadServices()
-  await loadCodingPlanConfig()
-  startStatusMonitor()
+  try {
+    console.log('Loading config...')
+    await loadConfig()
+    console.log('Config loaded')
+    
+    console.log('Loading OpenClaw paths...')
+    await loadOpenClawPaths()
+    console.log('OpenClaw paths loaded')
+    
+    console.log('Loading custom folders...')
+    await loadCustomFolders()
+    console.log('Custom folders loaded')
+    
+    console.log('Loading services...')
+    await loadServices()
+    console.log('Services loaded')
+    
+    console.log('Loading CodingPlan config...')
+    await loadCodingPlanConfig()
+    console.log('CodingPlan config loaded')
+    
+    startStatusMonitor()
+    console.log('Status monitor started')
+  } catch (e) {
+    console.error('Failed to load HomePage data:', e)
+  }
   
   // 点击其他地方关闭右键菜单
   document.addEventListener('click', closeContextMenu)
