@@ -23,7 +23,11 @@ const api = {
       throw e
     }
   },
-  saveServices: (services: any[]) => ipcRenderer.invoke('save-services', services),
+  // 保存服务配置（使用 JSON 序列化确保可克隆）
+  saveServices: (services: any[]) => {
+    const plainServices = JSON.parse(JSON.stringify(services))
+    return ipcRenderer.invoke('save-services', plainServices)
+  },
   startService: (service: any) => ipcRenderer.invoke('start-service', service),
   stopService: (serviceName: string) => ipcRenderer.invoke('stop-service', serviceName),
   forceStopService: () => ipcRenderer.invoke('force-stop-service'),

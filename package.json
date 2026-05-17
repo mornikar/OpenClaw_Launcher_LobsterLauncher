@@ -52,6 +52,12 @@
     },
     "files": [
       "out/**/*"
+    ],
+    "extraFiles": [
+      {
+        "from": "node_modules/@electron-toolkit/preload",
+        "to": "node_modules/@electron-toolkit/preload"
+      }
     ]
   }
 }

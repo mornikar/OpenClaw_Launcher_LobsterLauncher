@@ -745,18 +745,25 @@ function showAddServiceModal() {
 
 // 选择服务文件（支持exe）
 async function selectServiceFile() {
+  console.log('📂 打开文件选择对话框...')
   const path = await window.api.selectFile([
     { name: '可执行文件', extensions: ['exe', 'bat', 'cmd'] },
     { name: '所有文件', extensions: ['*'] }
   ])
+  console.log('📂 选择的文件路径:', path)
   if (path) {
     addServiceModal.value.exePath = path
+    console.log('✅ exePath 已设置:', addServiceModal.value.exePath)
     // 自动用文件名作为服务名
     if (!addServiceModal.value.name) {
       const parts = path.split('\\')
       const fileName = parts[parts.length - 1] || ''
-      addServiceModal.value.name = fileName.replace(/\.(exe|bat|cmd)$/i, '')
+      const serviceName = fileName.replace(/\.(exe|bat|cmd)$/i, '')
+      addServiceModal.value.name = serviceName
+      console.log('✅ 自动设置服务名:', serviceName)
     }
+  } else {
+    console.log('⚠️ 用户取消了文件选择')
   }
 }
 
@@ -770,28 +777,76 @@ async function selectServiceIcon() {
 
 // 添加本地服务
 async function addLocalService() {
+  console.log('🔍 添加本地服务 - 当前值:', {
+    name: addServiceModal.value.name,
+    exePath: addServiceModal.value.exePath,
+    iconPath: addServiceModal.value.iconPath
+  })
+  
   if (!addServiceModal.value.name || !addServiceModal.value.exePath) {
+    const missing = []
+    if (!addServiceModal.value.name) missing.push('服务名称')
+    if (!addServiceModal.value.exePath) missing.push('启动文件路径')
+    alert(`请填写完整信息：${missing.join('、')}`)
     return
   }
   
-  const newService = {
-    id: `local_${Date.now()}`,
-    name: addServiceModal.value.name,
-    icon: addServiceModal.value.iconPath ? '📷' : addServiceModal.value.icon,
-    iconPath: addServiceModal.value.iconPath,
-    exePath: addServiceModal.value.exePath,
-    status: 'stopped' as const
+  try {
+    const newService = {
+      id: `local_${Date.now()}`,
+      name: addServiceModal.value.name,
+      icon: addServiceModal.value.iconPath ? '📷' : addServiceModal.value.icon,
+      iconPath: addServiceModal.value.iconPath,
+      exePath: addServiceModal.value.exePath,
+      status: 'stopped' as const
+    }
+    
+    console.log('✅ 准备保存服务:', newService)
+    
+    // 手动构造纯对象数组，避免响应式对象无法克隆的问题
+    const existingServices = localServices.value.map(s => ({
+      id: s.id,
+      name: s.name,
+      icon: s.icon,
+      iconPath: s.iconPath || null,
+      exePath: s.exePath,
+      status: s.status
+    }))
+    const servicesList = [...existingServices, newService]
+    
+    console.log('📦 保存的服务列表:', servicesList)
+    await window.api.saveServices(servicesList)
+    
+    // 更新响应式状态
+    localServices.value = servicesList
+    addServiceModal.value.show = false
+    
+    // 重置表单
+    addServiceModal.value.name = ''
+    addServiceModal.value.exePath = ''
+    addServiceModal.value.icon = '🔧'
+    addServiceModal.value.iconPath = ''
+    
+    console.log('✅ 服务添加成功')
+  } catch (error) {
+    console.error('❌ 添加服务失败:', error)
+    alert('添加服务失败：' + (error instanceof Error ? error.message : String(error)))
   }
-  
-  const servicesList = [...localServices.value, newService]
-  await window.api.saveServices(servicesList)
-  localServices.value = servicesList
-  addServiceModal.value.show = false
 }
 
 // 删除本地服务
 async function deleteLocalService(id: string) {
-  const servicesList = localServices.value.filter(s => s.id !== id)
+  // 手动构造纯对象数组
+  const servicesList = localServices.value
+    .filter(s => s.id !== id)
+    .map(s => ({
+      id: s.id,
+      name: s.name,
+      icon: s.icon,
+      iconPath: s.iconPath || null,
+      exePath: s.exePath,
+      status: s.status
+    }))
   await window.api.saveServices(servicesList)
   localServices.value = servicesList
 }
@@ -1249,7 +1304,7 @@ function getFolderItems() {
     <!-- 添加服务弹窗 -->
     <div v-if="addServiceModal.show" class="modal-overlay" @click="addServiceModal.show = false">
       <div class="modal" @click.stop>
-        <div class="modal-header">
+        <div class="modal-header add-service-modal-header">
           <h3>➕ 添加本地服务</h3>
           <button class="close-btn" @click="addServiceModal.show = false">✕</button>
         </div>
@@ -1573,6 +1628,11 @@ function getFolderItems() {
   justify-content: space-between;
   padding: var(--spacing-md) var(--spacing-lg);
   border-bottom: 1px solid var(--color-border);
+}
+
+/* 添加服务弹窗标题居中 */
+.add-service-modal-header {
+  justify-content: center;
 }
 
 .modal-header h3 {
