@@ -122,6 +122,15 @@ const commonLinks = ref([
   { id: 'feishu', icon: '📮', name: '飞书开放平台', type: 'url', url: 'https://open.feishu.cn/app' }
 ])
 
+// 添加链接弹窗
+const addLinkModal = ref({
+  show: false,
+  icon: '🔗',
+  name: '',
+  type: 'url' as 'url' | 'codingplan',
+  url: ''
+})
+
 // 凭证显示状态
 const showPassword = ref(false)
 const copiedField = ref<string | null>(null)
@@ -683,6 +692,50 @@ async function deleteLink(id: string) {
   }
 }
 
+// 添加链接弹窗
+function showAddLinkModal() {
+  addLinkModal.value = {
+    show: true,
+    icon: '🔗',
+    name: '',
+    type: 'url',
+    url: ''
+  }
+}
+
+// 添加链接
+async function addLink() {
+  if (!addLinkModal.value.name || !addLinkModal.value.url) {
+    const missing = []
+    if (!addLinkModal.value.name) missing.push('链接名称')
+    if (!addLinkModal.value.url) missing.push('链接地址')
+    alert(`请填写完整信息：${missing.join('、')}`)
+    return
+  }
+  
+  try {
+    const newLink = {
+      id: `link_${Date.now()}`,
+      icon: addLinkModal.value.icon,
+      name: addLinkModal.value.name,
+      type: addLinkModal.value.type,
+      url: addLinkModal.value.url
+    }
+    
+    commonLinks.value = [...commonLinks.value, newLink]
+    addLinkModal.value.show = false
+    
+    // 重置表单
+    addLinkModal.value.icon = '🔗'
+    addLinkModal.value.name = ''
+    addLinkModal.value.type = 'url'
+    addLinkModal.value.url = ''
+  } catch (error) {
+    console.error('❌ 添加链接失败:', error)
+    alert('添加链接失败：' + (error instanceof Error ? error.message : String(error)))
+  }
+}
+
 // 添加文件夹（直接添加，已有路径）
 async function addCustomFolder() {
   const path = await window.api.selectFolder()
@@ -1074,6 +1127,9 @@ function getFolderItems() {
           <span>⭐</span>
           <span>常用</span>
         </div>
+        <button class="btn btn-sm btn-primary" @click="showAddLinkModal">
+          ➕ 添加
+        </button>
       </div>
       
       <div class="card-content">
@@ -1099,6 +1155,9 @@ function getFolderItems() {
           <span>⚡</span>
           <span>服务管理</span>
         </div>
+        <button class="btn btn-sm btn-primary" @click="showAddServiceModal">
+          ➕ 添加
+        </button>
       </div>
       
       <!-- 默认服务 -->
@@ -1406,6 +1465,59 @@ function getFolderItems() {
         <div class="modal-footer">
           <button class="btn btn-secondary" @click="addServiceModal.show = false">取消</button>
           <button class="btn btn-primary" @click="addLocalService">添加</button>
+        </div>
+      </div>
+    </div>
+    
+    <!-- 添加链接弹窗 -->
+    <div v-if="addLinkModal.show" class="modal-overlay" @click="addLinkModal.show = false">
+      <div class="modal" @click.stop>
+        <div class="modal-header">
+          <h3>➕ 添加常用链接</h3>
+          <button class="close-btn" @click="addLinkModal.show = false">✕</button>
+        </div>
+        <div class="modal-body">
+          <div class="form-group">
+            <label>图标</label>
+            <div class="icon-picker">
+              <span class="icon-preview">{{ addLinkModal.icon }}</span>
+              <input 
+                type="text" 
+                v-model="addLinkModal.icon" 
+                placeholder="🔗"
+                class="form-input"
+              />
+            </div>
+          </div>
+          <div class="form-group">
+            <label>链接名称</label>
+            <input 
+              type="text" 
+              v-model="addLinkModal.name" 
+              placeholder="输入链接名称"
+              class="form-input"
+            />
+          </div>
+          <div class="form-group">
+            <label>链接类型</label>
+            <select v-model="addLinkModal.type" class="form-input">
+              <option value="url">URL 链接</option>
+              <option value="codingplan">CodingPlan</option>
+            </select>
+          </div>
+          <div class="form-group" v-if="addLinkModal.type === 'url'">
+            <label>链接地址</label>
+            <input 
+              type="text" 
+              v-model="addLinkModal.url" 
+              placeholder="https://example.com"
+              class="form-input"
+            />
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-secondary" @click="addLinkModal.show = false">取消</button>
+          <button class="btn btn-primary" @click="addLink">添加</button>
         </div>
       </div>
     </div>
