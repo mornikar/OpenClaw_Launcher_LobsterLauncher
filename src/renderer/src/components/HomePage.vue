@@ -465,7 +465,7 @@ async function refreshToken() {
 }
 
 // 右键菜单
-function showContextMenu(event: MouseEvent, item: any, type: 'folder' | 'service') {
+function showContextMenu(event: MouseEvent, item: any, type: 'folder' | 'service' | 'link') {
   event.preventDefault()
   event.stopPropagation()
   contextMenu.value = {
@@ -493,6 +493,11 @@ async function handleContextMenuAction(action: string) {
         await openFolder(target.path)
       }
       break
+    case 'open-link':
+      if (target.url) {
+        await window.api.openUrl(target.url)
+      }
+      break
     case 'bind':
       await bindNewFolder(target)
       break
@@ -512,6 +517,9 @@ async function handleContextMenuAction(action: string) {
       break
     case 'delete-folder':
       await deleteCustomFolder(target.key)
+      break
+    case 'delete-link':
+      await deleteLink(target.id)
       break
   }
 }
@@ -630,9 +638,49 @@ async function confirmAddFolder() {
 
 // 删除自定义文件夹
 async function deleteCustomFolder(key: string) {
+  // 内置文件夹不允许删除，需要确认
+  if (!key.startsWith('custom_')) {
+    confirmDialog.value = {
+      show: true,
+      title: '删除文件夹',
+      message: '这是内置文件夹，删除它将恢复默认绑定。确定继续吗？',
+      onConfirm: async () => {
+        confirmDialog.value.show = false
+        // 内置文件夹不真正删除，只是从自定义列表中移除
+        // 这里不做任何操作，因为内置文件夹不在 customFolders 中
+      }
+    }
+    return
+  }
+  
   const folders = JSON.parse(JSON.stringify(customFolders.value.filter(f => f.key !== key)))
   await window.api.saveCustomFolders(folders)
   await loadCustomFolders()
+}
+
+// 删除链接
+async function deleteLink(id: string) {
+  confirmDialog.value = {
+    show: true,
+    title: '删除链接',
+    message: '确定要删除这个常用链接吗？',
+    onConfirm: async () => {
+      confirmDialog.value.show = false
+      // 手动构造纯对象数组
+      const linksList = commonLinks.value
+        .filter(l => l.id !== id)
+        .map(l => ({
+          id: l.id,
+          icon: l.icon,
+          name: l.name,
+          type: l.type,
+          url: l.url
+        }))
+      // 注意：commonLinks 是组件内的响应式数据，没有持久化存储
+      // 如果需要持久化，需要调用 IPC 保存
+      commonLinks.value = linksList
+    }
+  }
 }
 
 // 添加文件夹（直接添加，已有路径）
@@ -1034,6 +1082,7 @@ function getFolderItems() {
           :key="link.id" 
           class="shortcut-card"
           @click="openLink(link)"
+          @contextmenu="showContextMenu($event, link, 'link')"
         >
           <span class="shortcut-icon">{{ link.icon }}</span>
           <span class="shortcut-name">{{ link.name }}</span>
@@ -1192,9 +1241,19 @@ function getFolderItems() {
           🔗 绑定/添加文件夹
         </div>
         <div 
-          v-if="contextMenu.target?.key?.startsWith('custom_')" 
           class="context-menu-item danger" 
           @click="handleContextMenuAction('delete-folder')"
+        >
+          🗑 删除
+        </div>
+      </template>
+      <template v-if="contextMenu.target?.type === 'link'">
+        <div class="context-menu-item" @click="handleContextMenuAction('open-link')">
+          🔗 打开链接
+        </div>
+        <div 
+          class="context-menu-item danger" 
+          @click="handleContextMenuAction('delete-link')"
         >
           🗑 删除
         </div>
