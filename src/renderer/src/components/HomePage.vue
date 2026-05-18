@@ -1085,9 +1085,6 @@ function getFolderItems() {
           <span>📁</span>
           <span>文件夹</span>
         </div>
-        <button class="btn btn-sm btn-primary" @click="showAddFolderModal">
-          ➕ 添加
-        </button>
       </div>
       
       <div class="card-content">
@@ -1116,6 +1113,12 @@ function getFolderItems() {
           <span class="shortcut-icon">{{ folder.icon }}</span>
           <span class="shortcut-name">{{ folder.name }}</span>
           <span class="shortcut-path">{{ folder.path }}</span>
+        </div>
+        
+        <!-- 添加文件夹卡片 -->
+        <div class="shortcut-card add-card" @click="showAddFolderModal">
+          <span class="shortcut-icon">➕</span>
+          <span class="shortcut-name">添加文件夹</span>
         </div>
       </div>
     </div>
@@ -1193,6 +1196,12 @@ function getFolderItems() {
             </button>
           </div>
         </div>
+        
+        <!-- 添加服务卡片 -->
+        <div class="shortcut-card add-card" @click="showAddServiceModal">
+          <span class="shortcut-icon">➕</span>
+          <span class="shortcut-name">添加服务</span>
+        </div>
       </div>
       
       <!-- 本地服务 -->
@@ -1227,14 +1236,6 @@ function getFolderItems() {
               ⏹ 停止
             </button>
           </div>
-        </div>
-      </div>
-      
-      <!-- 添加服务卡片（始终显示） -->
-      <div class="services-grid">
-        <div class="shortcut-card add-card" @click="showAddServiceModal">
-          <span class="shortcut-icon">➕</span>
-          <span class="shortcut-name">添加服务</span>
         </div>
       </div>
     </div>
