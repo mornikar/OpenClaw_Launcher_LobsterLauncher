@@ -1127,9 +1127,6 @@ function getFolderItems() {
           <span>⭐</span>
           <span>常用</span>
         </div>
-        <button class="btn btn-sm btn-primary" @click="showAddLinkModal">
-          ➕ 添加
-        </button>
       </div>
       
       <div class="card-content">
@@ -1145,6 +1142,12 @@ function getFolderItems() {
           <span class="shortcut-path" v-if="link.type === 'url'">{{ link.url }}</span>
           <span class="shortcut-path" v-else>点击配置</span>
         </div>
+        
+        <!-- 添加链接卡片 -->
+        <div class="shortcut-card add-card" @click="showAddLinkModal">
+          <span class="shortcut-icon">➕</span>
+          <span class="shortcut-name">添加链接</span>
+        </div>
       </div>
     </div>
     
@@ -1155,9 +1158,6 @@ function getFolderItems() {
           <span>⚡</span>
           <span>服务管理</span>
         </div>
-        <button class="btn btn-sm btn-primary" @click="showAddServiceModal">
-          ➕ 添加
-        </button>
       </div>
       
       <!-- 默认服务 -->
@@ -1228,19 +1228,14 @@ function getFolderItems() {
             </button>
           </div>
         </div>
-        
-        <!-- 添加服务卡片 -->
+      </div>
+      
+      <!-- 添加服务卡片（始终显示） -->
+      <div class="services-grid">
         <div class="shortcut-card add-card" @click="showAddServiceModal">
           <span class="shortcut-icon">➕</span>
           <span class="shortcut-name">添加服务</span>
         </div>
-      </div>
-      
-      <!-- 无本地服务时显示添加按钮 -->
-      <div class="section-title" v-if="localServices.length === 0">
-        <button class="btn btn-primary btn-sm" @click="showAddServiceModal">
-          ➕ 添加本地服务
-        </button>
       </div>
     </div>
     
